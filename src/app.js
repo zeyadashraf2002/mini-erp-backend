@@ -14,6 +14,7 @@ import paymentsRoutes from './modules/accounting/payments/payments.routes.js';
 
 // Import Middlewares
 import errorMiddleware from './middlewares/error.middleware.js';
+import moduleMiddleware from './middlewares/module.middleware.js';
 
 const app = express();
 
@@ -52,14 +53,14 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Dat
 app.use('/api/auth', authRoutes);
 // app.use('/api/core', coreRoutes);
 
-// Accounting Sub-modules
-app.use('/api/accounting/accounts', accountsRoutes);
-app.use('/api/accounting/journals', journalEntriesRoutes);
-app.use('/api/accounting/reports', reportsRoutes);
+// Accounting Sub-modules (Protected by 'accounting' module check)
+app.use('/api/accounting/accounts', moduleMiddleware('accounting'), accountsRoutes);
+app.use('/api/accounting/journals', moduleMiddleware('accounting'), journalEntriesRoutes);
+app.use('/api/accounting/reports', moduleMiddleware('accounting'), reportsRoutes);
 
-// Invoices & Payments (kept at root API level for backward compat, or could move to /api/accounting/invoices)
-app.use('/api/invoices', invoicesRoutes);
-app.use('/api/payments', paymentsRoutes);
+// Invoices & Payments (Also part of accounting logic usually, restricting them too)
+app.use('/api/invoices', moduleMiddleware('accounting'), invoicesRoutes);
+app.use('/api/payments', moduleMiddleware('accounting'), paymentsRoutes);
 
 // Error Handling
 app.use(errorMiddleware);
