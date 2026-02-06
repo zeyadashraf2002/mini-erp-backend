@@ -1,14 +1,15 @@
-const reportsService = require('./reports.service');
+import reportsService from './reports.service.js';
 
 const getTrialBalance = async (req, res, next) => {
     try {
-        const report = await reportsService.getTrialBalance(req.user.companyId);
+        const { startDate, endDate } = req.query;
+        const report = await reportsService.getTrialBalance(req.user.companyId, { startDate, endDate });
         res.status(200).json({ success: true, data: report });
     } catch (error) {
         next(error);
     }
 }
 
-module.exports = {
+export default {
     getTrialBalance
 };

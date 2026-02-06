@@ -1,5 +1,6 @@
-const prisma = require('../../../utils/prisma');
-// const accountingService = require('../journal-entries/journal-entries.service');
+import prisma from '../../../utils/prisma.js';
+import accountsService from '../accounts/accounts.service.js';
+// import accountingService from '../journal-entries/journal-entries.service.js';
 
 const createInvoice = async (companyId, data) => {
   return await prisma.$transaction(async (tx) => {
@@ -17,36 +18,10 @@ const createInvoice = async (companyId, data) => {
       }
     });
 
-    // 2. Find necessary accounts (Accounts Receivable & Revenue)
-    // Priority: 1) By specific name, 2) By code pattern, 3) By type
-    const accounts = await tx.account.findMany({
-      where: { companyId }
-    });
-
-    // Find Accounts Receivable (ذمم مدينة / Debtors)
-    const arAccount = accounts.find(a => 
-      a.name.toLowerCase().includes('receivable') || 
-      a.name.toLowerCase().includes('ذمم') ||
-      a.name.toLowerCase().includes('مدين') ||
-      (a.code && a.code.startsWith('1') && a.code.includes('2')) // Common AR code pattern: 120x
-    );
-
-    // Find Revenue/Sales account
-    const revenueAccount = accounts.find(a => 
-      a.name.toLowerCase().includes('sales') || 
-      a.name.toLowerCase().includes('revenue') ||
-      a.name.toLowerCase().includes('مبيعات') ||
-      a.name.toLowerCase().includes('إيراد') ||
-      a.type === 'REVENUE'
-    );
-
-    if (!arAccount) {
-      throw new Error('Accounts Receivable account not found. Please create an account with "Accounts Receivable" or "ذمم مدينة" in the name.');
-    }
-
-    if (!revenueAccount) {
-      throw new Error('Revenue/Sales account not found. Please create a REVENUE type account.');
-    }
+    // 2. Find or Create necessary accounts (Accounts Receivable & Revenue)
+    // Auto-provisioning
+    const arAccount = await accountsService.ensureSystemAccount(companyId, 'ASSET', '120', 'Accounts Receivable');
+    const revenueAccount = await accountsService.ensureSystemAccount(companyId, 'REVENUE', '401', 'Sales');
 
     // 3. Create Journal Entry
     const journalEntry = await tx.journalEntry.create({
@@ -90,7 +65,7 @@ const getInvoices = async (companyId) => {
   });
 };
 
-module.exports = {
+export default {
   createInvoice,
   getInvoices
 };

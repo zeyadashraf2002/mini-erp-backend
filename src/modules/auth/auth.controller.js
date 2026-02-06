@@ -1,5 +1,5 @@
-const authService = require('./auth.service');
-const Joi = require('joi');
+import authService from './auth.service.js';
+import Joi from 'joi';
 
 const register = async (req, res, next) => {
   try {
@@ -45,7 +45,7 @@ const login = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   register,
   login,
 };

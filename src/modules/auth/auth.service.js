@@ -1,6 +1,6 @@
-const prisma = require('../../utils/prisma');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+import prisma from '../../utils/prisma.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const registerCompany = async ({ companyName, email, password, name }) => {
   const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -89,7 +89,7 @@ const login = async ({ email, password }) => {
   return { token, user: { id: user.id, email: user.email, name: user.name, role: user.role, company: user.company } };
 };
 
-module.exports = {
+export default {
   registerCompany,
   login,
 };

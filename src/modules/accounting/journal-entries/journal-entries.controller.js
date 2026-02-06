@@ -1,5 +1,5 @@
-const journalEntriesService = require('./journal-entries.service');
-const Joi = require('joi');
+import journalEntriesService from './journal-entries.service.js';
+import Joi from 'joi';
 
 const validateDrCr = (lines) => {
     let totalDebit = 0;
@@ -63,6 +63,6 @@ const createJournalEntry = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   createJournalEntry,
 };

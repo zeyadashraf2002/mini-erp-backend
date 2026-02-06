@@ -1,5 +1,5 @@
-const invoicesService = require('./invoices.service');
-const Joi = require('joi');
+import invoicesService from './invoices.service.js';
+import Joi from 'joi';
 
 const createInvoice = async (req, res, next) => {
   try {
@@ -35,7 +35,7 @@ const getInvoices = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   createInvoice,
   getInvoices
 };

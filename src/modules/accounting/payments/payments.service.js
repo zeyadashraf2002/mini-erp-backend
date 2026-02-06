@@ -1,5 +1,5 @@
-const prisma = require('../../../utils/prisma');
-const accountsService = require('../accounts/accounts.service');
+import prisma from '../../../utils/prisma.js';
+import accountsService from '../accounts/accounts.service.js';
 
 const createPayment = async (companyId, data) => {
   return await prisma.$transaction(async (tx) => {
@@ -33,18 +33,10 @@ const createPayment = async (companyId, data) => {
       }
     });
 
-    // 4. Find necessary accounts (Cash & Accounts Receivable)
-    // Use Strict Lookup via helper
-    const cashAccount = await accountsService.findSystemAccount(companyId, 'ASSET', ['101', '102']); 
-    const arAccount = await accountsService.findSystemAccount(companyId, 'ASSET', ['120', '1200']);
-
-    if (!cashAccount) {
-        throw new Error('Cash account not found. Please create an Asset account with Code 101 or 102.');
-    }
-
-    if (!arAccount) {
-        throw new Error('Accounts Receivable account not found. Please create an Asset account with Code 120.');
-    }
+    // 4. Find or Create necessary accounts (Cash & Accounts Receivable)
+    // Auto-provisioning: If they don't exist, create them.
+    const cashAccount = await accountsService.ensureSystemAccount(companyId, 'ASSET', '101', 'Cash'); 
+    const arAccount = await accountsService.ensureSystemAccount(companyId, 'ASSET', '120', 'Accounts Receivable');
 
     // 5. Create Journal Entry
     const journalEntry = await tx.journalEntry.create({
@@ -77,7 +69,6 @@ const createPayment = async (companyId, data) => {
     });
 
     // 6. Update Invoice Status
-    // 6. Update Invoice Status
     // Recalculate including the current payment
     const newTotalPaid = totalPaid + Number(data.amount);
     if (newTotalPaid >= Number(invoice.amount)) {
@@ -107,7 +98,7 @@ const getPayments = async (companyId) => {
   });
 };
 
-module.exports = {
+export default {
   createPayment,
   getPayments
 };

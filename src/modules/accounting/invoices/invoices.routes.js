@@ -1,11 +1,12 @@
-const express = require('express');
+import express from 'express';
+import invoicesController from './invoices.controller.js';
+import authMiddleware from '../../../middlewares/auth.middleware.js';
+
 const router = express.Router();
-const invoicesController = require('./invoices.controller');
-const authMiddleware = require('../../../middlewares/auth.middleware');
 
 router.use(authMiddleware);
 
 router.post('/', invoicesController.createInvoice);
 router.get('/', invoicesController.getInvoices);
 
-module.exports = router;
+export default router;

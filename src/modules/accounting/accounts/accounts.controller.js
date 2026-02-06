@@ -1,5 +1,5 @@
-const accountsService = require('./accounts.service');
-const Joi = require('joi');
+import accountsService from './accounts.service.js';
+import Joi from 'joi';
 
 const createAccount = async (req, res, next) => {
   try {
@@ -33,7 +33,7 @@ const getCOA = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   createAccount,
   getCOA,
 };

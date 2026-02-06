@@ -1,4 +1,4 @@
-const prisma = require('../../../utils/prisma');
+import prisma from '../../../utils/prisma.js';
 
 const createJournalEntry = async (companyId, { date, description, reference, lines }) => {
   // Strict Validation Rules
@@ -59,6 +59,6 @@ const createJournalEntry = async (companyId, { date, description, reference, lin
   });
 };
 
-module.exports = {
+export default {
   createJournalEntry,
 };

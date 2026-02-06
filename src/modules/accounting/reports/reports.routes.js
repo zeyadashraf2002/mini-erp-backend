@@ -1,10 +1,11 @@
-const express = require('express');
+import express from 'express';
+import reportsController from './reports.controller.js';
+import authMiddleware from '../../../middlewares/auth.middleware.js';
+
 const router = express.Router();
-const reportsController = require('./reports.controller');
-const authMiddleware = require('../../../middlewares/auth.middleware');
 
 router.use(authMiddleware);
 
 router.get('/trial-balance', reportsController.getTrialBalance);
 
-module.exports = router;
+export default router;

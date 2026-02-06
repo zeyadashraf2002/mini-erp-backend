@@ -1,4 +1,4 @@
-const prisma = require('../../../utils/prisma');
+import prisma from '../../../utils/prisma.js';
 
 const createAccount = async (companyId, data) => {
   return await prisma.account.create({
@@ -41,8 +41,38 @@ const findSystemAccount = async (companyId, type, preferredCodes = []) => {
   return account;
 };
 
-module.exports = {
+const ensureSystemAccount = async (companyId, type, preferredCode, name) => {
+  // 1. Try to find existing
+  let account = await findSystemAccount(companyId, type, [preferredCode]);
+
+  // 2. If not found, create it
+  if (!account) {
+    console.log(`[Auto-Provisioning] Creating missing system account: ${name} (${preferredCode})`);
+    try {
+      account = await prisma.account.create({
+        data: {
+          companyId,
+          code: preferredCode,
+          name: name,
+          type: type,
+          description: `System generated ${name} account`
+        }
+      });
+    } catch (error) {
+      // Handle race condition where account might have been created in parallel
+      if (error.code === 'P2002') {
+        account = await findSystemAccount(companyId, type, [preferredCode]);
+      } else {
+        throw error;
+      }
+    }
+  }
+  return account;
+};
+
+export default {
   createAccount,
   getCOA,
-  findSystemAccount
+  findSystemAccount,
+  ensureSystemAccount
 };

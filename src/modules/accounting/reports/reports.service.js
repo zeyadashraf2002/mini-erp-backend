@@ -1,4 +1,4 @@
-const prisma = require('../../../utils/prisma');
+import prisma from '../../../utils/prisma.js';
 
 const getTrialBalance = async (companyId, { startDate, endDate } = {}) => {
     // Query-based calculation with date filters
@@ -54,6 +54,6 @@ const getTrialBalance = async (companyId, { startDate, endDate } = {}) => {
     return report;
 }
 
-module.exports = {
+export default {
     getTrialBalance
 };

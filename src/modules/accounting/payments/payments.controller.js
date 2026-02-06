@@ -1,5 +1,5 @@
-const paymentsService = require('./payments.service');
-const Joi = require('joi');
+import paymentsService from './payments.service.js';
+import Joi from 'joi';
 
 const createPayment = async (req, res, next) => {
   try {
@@ -33,7 +33,7 @@ const getPayments = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   createPayment,
   getPayments
 };

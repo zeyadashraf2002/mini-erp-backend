@@ -1,10 +1,11 @@
-const express = require('express');
+import express from 'express';
+import journalEntriesController from './journal-entries.controller.js';
+import authMiddleware from '../../../middlewares/auth.middleware.js';
+
 const router = express.Router();
-const journalEntriesController = require('./journal-entries.controller');
-const authMiddleware = require('../../../middlewares/auth.middleware');
 
 router.use(authMiddleware);
 
 router.post('/', journalEntriesController.createJournalEntry);
 
-module.exports = router;
+export default router;

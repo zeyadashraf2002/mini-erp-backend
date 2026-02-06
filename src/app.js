@@ -1,25 +1,28 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
 
 // Import Modules
-const authRoutes = require('./modules/auth/auth.routes');
+import authRoutes from './modules/auth/auth.routes.js';
 // const coreRoutes = require('./modules/core/core.routes');
-const accountsRoutes = require('./modules/accounting/accounts/accounts.routes');
-const journalEntriesRoutes = require('./modules/accounting/journal-entries/journal-entries.routes');
-const reportsRoutes = require('./modules/accounting/reports/reports.routes');
-const invoicesRoutes = require('./modules/accounting/invoices/invoices.routes');
-const paymentsRoutes = require('./modules/accounting/payments/payments.routes');
+import accountsRoutes from './modules/accounting/accounts/accounts.routes.js';
+import journalEntriesRoutes from './modules/accounting/journal-entries/journal-entries.routes.js';
+import reportsRoutes from './modules/accounting/reports/reports.routes.js';
+import invoicesRoutes from './modules/accounting/invoices/invoices.routes.js';
+import paymentsRoutes from './modules/accounting/payments/payments.routes.js';
 
 // Import Middlewares
-const errorMiddleware = require('./middlewares/error.middleware');
+import errorMiddleware from './middlewares/error.middleware.js';
 
 const app = express();
 
 // Global Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*', // Allow all or specific origin
+  credentials: true
+}));
 app.use(express.json());
 app.use(morgan('dev'));
 
@@ -40,4 +43,4 @@ app.use('/api/payments', paymentsRoutes);
 // Error Handling
 app.use(errorMiddleware);
 
-module.exports = app;
+export default app;
