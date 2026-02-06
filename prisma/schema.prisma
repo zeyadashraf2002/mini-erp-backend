@@ -1,0 +1,203 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Core Core ---
+
+model Company {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  users          User[]
+  companyModules CompanyModule[]
+
+  // Accounting Relations
+  accounts       Account[]
+  journalEntries JournalEntry[]
+
+  // Invoicing & Payments Relations
+  invoices       Invoice[]
+  payments       Payment[]
+
+  @@map("companies")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(ADMIN) 
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model SystemModule {
+  id          String   @id // e.g. 'accounting', 'hr'
+  name        String
+  description String?
+  companies   CompanyModule[]
+
+  @@map("system_modules")
+}
+
+model CompanyModule {
+  id           String       @id @default(uuid())
+  companyId    String
+  company      Company      @relation(fields: [companyId], references: [id])
+  moduleId     String
+  systemModule SystemModule @relation(fields: [moduleId], references: [id])
+  status       ModuleStatus @default(ACTIVE)
+
+  @@unique([companyId, moduleId])
+  @@map("company_modules")
+}
+
+enum ModuleStatus {
+  ACTIVE
+  INACTIVE
+}
+
+// --- Accounting Module ---
+
+model Account {
+  id          String      @id @default(uuid())
+  companyId   String
+  company     Company     @relation(fields: [companyId], references: [id])
+  code        String      // e.g., '101'
+  name        String      // e.g., 'Cash'
+  type        AccountType
+  description String?
+  
+  journalLines JournalLine[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([companyId, code])
+  @@map("accounts")
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+model JournalEntry {
+  id          String        @id @default(uuid())
+  companyId   String
+  company     Company       @relation(fields: [companyId], references: [id])
+  date        DateTime
+  description String
+  reference   String?       // Invoice # etc.
+  status      JournalStatus @default(POSTED)
+  
+  journalLines JournalLine[]
+
+  // Relations to source documents
+  invoice      Invoice?
+  payment      Payment?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("journal_entries")
+}
+
+enum JournalStatus {
+  DRAFT
+  POSTED
+}
+
+model JournalLine {
+  id             String       @id @default(uuid())
+  journalEntryId String
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  accountId      String
+  account        Account      @relation(fields: [accountId], references: [id])
+  
+  debit          Decimal      @db.Decimal(20, 2) @default(0)
+  credit         Decimal      @db.Decimal(20, 2) @default(0)
+  
+  description    String?
+
+  @@map("journal_lines")
+}
+
+// --- Invoicing & Payments ---
+
+model Invoice {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  customerId  String   // In a real app, this would be a relation to a Customer model
+  customerName String
+  
+  invoiceNumber String
+  date        DateTime
+  dueDate     DateTime?
+  
+  amount      Decimal  @db.Decimal(20, 2)
+  status      InvoiceStatus @default(UNPAID)
+  
+  // Link to the auto-generated Journal Entry
+  journalEntryId String? @unique
+  journalEntry   JournalEntry? @relation(fields: [journalEntryId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  payments    Payment[]
+
+  @@unique([companyId, invoiceNumber])
+  @@map("invoices")
+}
+
+enum InvoiceStatus {
+  DRAFT
+  UNPAID
+  PAID
+  OVERDUE
+  VOID
+}
+
+model Payment {
+  id          String   @id @default(uuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id])
+  
+  amount      Decimal  @db.Decimal(20, 2)
+  date        DateTime
+  method      String?  // Cash, Bank, Check
+  
+  // Link to the auto-generated Journal Entry
+  journalEntryId String? @unique
+  journalEntry   JournalEntry? @relation(fields: [journalEntryId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("payments")
+}
