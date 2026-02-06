@@ -61,6 +61,7 @@ const createInvoice = async (companyId, data) => {
 const getInvoices = async (companyId) => {
   return await prisma.invoice.findMany({
     where: { companyId },
+    include: { payments: true },
     orderBy: { createdAt: 'desc' }
   });
 };
