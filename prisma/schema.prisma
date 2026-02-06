@@ -121,6 +121,7 @@ model JournalEntry {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([companyId, status, date])
   @@map("journal_entries")
 }
 
@@ -141,6 +142,7 @@ model JournalLine {
   
   description    String?
 
+  @@index([accountId])
   @@map("journal_lines")
 }
 
@@ -170,6 +172,7 @@ model Invoice {
   payments    Payment[]
 
   @@unique([companyId, invoiceNumber])
+  @@index([companyId, createdAt])
   @@map("invoices")
 }
 
@@ -200,5 +203,6 @@ model Payment {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([companyId, createdAt])
   @@map("payments")
 }
