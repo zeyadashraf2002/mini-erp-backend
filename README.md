@@ -15,7 +15,8 @@ A Multi-Tenant Mini ERP with a strictly validated Accounting Module.
 -   **Automation**:
     -   **Invoices**: Auto-creates `AR` (Debit) and `Revenue` (Credit) entries.
     -   **Payments**: Auto-creates `Cash` (Debit) and `AR` (Credit) entries.
--   **Reporting**: Real-time Trial Balance.
+-   **Reporting**: Real-time Trial Balance (Database-optimized aggregation).
+-   **Performance**: Optimized with database indexes on `companyId` and `createdAt` for Invoices, Payments, and Journal Entries.
 
 ## 🛠 Tech Stack
 -   **Runtime**: Node.js (v18+)
