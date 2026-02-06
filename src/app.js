@@ -27,6 +27,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // Routes
+app.get('/', (req, res) => res.send('Mini ERP Backend is running!'));
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
 app.use('/api/auth', authRoutes);
 // app.use('/api/core', coreRoutes);
