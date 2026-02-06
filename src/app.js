@@ -20,7 +20,27 @@ const app = express();
 // Global Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*', // Allow all or specific origin
+  origin: (origin, callback) => {
+    const allowedOrigins = [process.env.CORS_ORIGIN];
+    // Allow requests with no origin (like mobile apps or curl calls)
+    if (!origin) return callback(null, true);
+    
+    // Allow any Vercel deployment (preview or production)
+    if (origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+
+    // Allow localhost for local development
+    if (origin.includes('localhost')) {
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.indexOf(origin) !== -1 || !process.env.CORS_ORIGIN) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
